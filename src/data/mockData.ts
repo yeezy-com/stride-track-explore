@@ -1,0 +1,78 @@
+
+export const mockCourses = [
+  {
+    id: '1',
+    name: '한강 여의도 일몰 코스',
+    location: '서울 여의도한강공원',
+    description: '한강을 따라 달리며 아름다운 일몰을 감상할 수 있는 코스입니다. 평탄한 길로 초보자도 쉽게 달릴 수 있으며, 저녁 시간대에 특히 인기가 많습니다.',
+    difficulty: '초급',
+    distance: 3.5,
+    estimatedTime: '25분',
+    likes: 142,
+    isLiked: false,
+    author: '러닝매니아',
+    createdAt: '2024-06-15',
+    coordinates: [126.9346, 37.5219],
+    tags: ['일몰', '한강', '초보자', '야경']
+  },
+  {
+    id: '2',
+    name: '남산 힐링 트레일',
+    location: '서울 남산공원',
+    description: '남산의 자연을 만끽하며 달릴 수 있는 코스입니다. 적당한 경사와 함께 서울 시내 전망을 즐길 수 있어 많은 러너들이 찾는 명소입니다.',
+    difficulty: '중급',
+    distance: 4.2,
+    estimatedTime: '35분',
+    likes: 98,
+    isLiked: true,
+    author: '산악러너',
+    createdAt: '2024-06-10',
+    coordinates: [126.9883, 37.5507],
+    tags: ['남산', '전망', '힐링', '자연']
+  },
+  {
+    id: '3',
+    name: '청계천 도심 런닝',
+    location: '서울 청계천',
+    description: '도심 속에서 즐기는 특별한 러닝 경험. 청계천을 따라 달리며 도시의 활기를 느낄 수 있는 코스입니다. 접근성이 좋아 직장인들에게 인기입니다.',
+    difficulty: '초급',
+    distance: 2.8,
+    estimatedTime: '20분',
+    likes: 76,
+    isLiked: false,
+    author: '도심러너',
+    createdAt: '2024-06-12',
+    coordinates: [126.9784, 37.5694],
+    tags: ['도심', '접근성', '청계천', '직장인']
+  },
+  {
+    id: '4',
+    name: '올림픽공원 벚꽃길',
+    location: '서울 올림픽공원',
+    description: '넓은 공원을 활용한 다양한 루트 선택이 가능한 코스입니다. 계절마다 다른 매력을 보여주며, 특히 봄철 벚꽃이 아름답습니다.',
+    difficulty: '중급',
+    distance: 5.0,
+    estimatedTime: '40분',
+    likes: 124,
+    isLiked: false,
+    author: '공원애호가',
+    createdAt: '2024-06-08',
+    coordinates: [127.1219, 37.5219],
+    tags: ['공원', '벚꽃', '계절', '다양한루트']
+  },
+  {
+    id: '5',
+    name: '한강 잠수교 왕복',
+    location: '서울 반포한강공원',
+    description: '잠수교를 중심으로 한 왕복 코스로, 한강의 웅장함을 제대로 느낄 수 있습니다. 거리가 길어 체력 향상에 도움이 되는 고급 코스입니다.',
+    difficulty: '고급',
+    distance: 7.5,
+    estimatedTime: '55분',
+    likes: 89,
+    isLiked: true,
+    author: '마라톤러너',
+    createdAt: '2024-06-05',
+    coordinates: [126.9956, 37.5133],
+    tags: ['장거리', '한강', '체력향상', '잠수교']
+  }
+];
