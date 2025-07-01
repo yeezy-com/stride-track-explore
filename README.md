@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# 러닝 코스 공유 서비스!
 
 ## Project info
 
