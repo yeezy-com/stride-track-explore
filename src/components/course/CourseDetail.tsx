@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { X, MapPin, Clock, TrendingUp, User, Calendar, Heart, Play } from 'lucide-react';
+import { X, MapPin, Clock, TrendingUp, User, Calendar, Heart, Play, Users } from 'lucide-react';
 
 export const CourseDetail = ({ course, onClose }) => {
   return (
@@ -33,6 +33,10 @@ export const CourseDetail = ({ course, onClose }) => {
             <Heart className="w-4 h-4 fill-current" />
             <span className="text-sm">{course.likes}</span>
           </div>
+          <div className="flex items-center gap-1 text-blue-600">
+            <Users className="w-4 h-4" />
+            <span className="text-sm">{course.completedCount}명 완주</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -49,6 +53,26 @@ export const CourseDetail = ({ course, onClose }) => {
               예상 시간
             </div>
             <div className="text-2xl font-bold text-green-600">{course.estimatedTime}</div>
+          </div>
+        </div>
+
+        {/* 경로 지도 표시 영역 */}
+        <Separator />
+        <div>
+          <h3 className="font-semibold mb-3 text-gray-800">코스 경로</h3>
+          <div className="bg-gray-100 rounded-lg p-4 h-48 flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <MapPin className="w-8 h-8 text-blue-500 mx-auto" />
+              <div className="text-sm text-gray-600">
+                <div className="font-medium">총 {course.routeCoordinates?.length || 0}개 지점</div>
+                <div className="text-xs mt-1">
+                  시작: {course.routeCoordinates?.[0]?.[1].toFixed(4)}, {course.routeCoordinates?.[0]?.[0].toFixed(4)}
+                </div>
+                <div className="text-xs">
+                  종료: {course.routeCoordinates?.[course.routeCoordinates.length-1]?.[1].toFixed(4)}, {course.routeCoordinates?.[course.routeCoordinates.length-1]?.[0].toFixed(4)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

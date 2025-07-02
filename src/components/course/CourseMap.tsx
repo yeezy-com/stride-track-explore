@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Route } from 'lucide-react';
 
 export const CourseMap = ({ courses, onCourseSelect }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -27,27 +27,83 @@ export const CourseMap = ({ courses, onCourseSelect }) => {
     // 네비게이션 컨트롤 추가
     map.current.addControl(new (window as any).mapboxgl.NavigationControl());
 
-    // 코스들을 마커로 표시
-    courses.forEach((course) => {
-      if (course.coordinates) {
-        const marker = new (window as any).mapboxgl.Marker({
-          color: '#3B82F6'
-        })
-        .setLngLat(course.coordinates)
-        .setPopup(
-          new (window as any).mapboxgl.Popup().setHTML(`
-            <div class="p-2">
-              <h3 class="font-semibold">${course.name}</h3>
-              <p class="text-sm text-gray-600">${course.distance}km • ${course.difficulty}</p>
-            </div>
-          `)
-        )
-        .addTo(map.current);
+    // 지도가 로드된 후 경로와 마커 추가
+    map.current.on('load', () => {
+      // 각 코스의 경로를 지도에 추가
+      courses.forEach((course, index) => {
+        if (course.routeCoordinates && course.routeCoordinates.length > 1) {
+          // 경로 소스 추가
+          map.current.addSource(`route-${course.id}`, {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {
+                courseId: course.id,
+                courseName: course.name
+              },
+              geometry: {
+                type: 'LineString',
+                coordinates: course.routeCoordinates
+              }
+            }
+          });
 
-        marker.getElement().addEventListener('click', () => {
-          onCourseSelect(course);
-        });
-      }
+          // 경로 레이어 추가
+          map.current.addLayer({
+            id: `route-${course.id}`,
+            type: 'line',
+            source: `route-${course.id}`,
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': index % 2 === 0 ? '#3B82F6' : '#10B981',
+              'line-width': 3,
+              'line-opacity': 0.8
+            }
+          });
+
+          // 경로 클릭 이벤트
+          map.current.on('click', `route-${course.id}`, () => {
+            onCourseSelect(course);
+          });
+
+          // 마우스 커서 변경
+          map.current.on('mouseenter', `route-${course.id}`, () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+          });
+
+          map.current.on('mouseleave', `route-${course.id}`, () => {
+            map.current.getCanvas().style.cursor = '';
+          });
+        }
+
+        // 시작점 마커 추가
+        if (course.coordinates) {
+          const marker = new (window as any).mapboxgl.Marker({
+            color: '#EF4444'
+          })
+          .setLngLat(course.coordinates)
+          .setPopup(
+            new (window as any).mapboxgl.Popup().setHTML(`
+              <div class="p-3">
+                <h3 class="font-semibold text-sm">${course.name}</h3>
+                <p class="text-xs text-gray-600 mt-1">${course.distance}km • ${course.difficulty}</p>
+                <div class="flex items-center gap-2 mt-2 text-xs">
+                  <span class="text-red-500">❤ ${course.likes}</span>
+                  <span class="text-blue-500">👥 ${course.completedCount}</span>
+                </div>
+              </div>
+            `)
+          )
+          .addTo(map.current);
+
+          marker.getElement().addEventListener('click', () => {
+            onCourseSelect(course);
+          });
+        }
+      });
     });
   };
 
@@ -73,8 +129,8 @@ export const CourseMap = ({ courses, onCourseSelect }) => {
     <Card className="h-[600px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-500" />
-          코스 지도
+          <Route className="w-5 h-5 text-blue-500" />
+          코스 경로 지도
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 h-[calc(100%-80px)]">
@@ -84,7 +140,7 @@ export const CourseMap = ({ courses, onCourseSelect }) => {
               <Navigation className="w-12 h-12 text-blue-500 mx-auto" />
               <h3 className="text-lg font-semibold">Mapbox 토큰 입력</h3>
               <p className="text-sm text-gray-600">
-                지도 기능을 사용하려면 Mapbox 공개 토큰이 필요합니다
+                러닝 코스 경로를 지도에 표시하려면 Mapbox 공개 토큰이 필요합니다
               </p>
               <a 
                 href="https://mapbox.com/" 
@@ -108,7 +164,7 @@ export const CourseMap = ({ courses, onCourseSelect }) => {
                 className="w-full"
                 disabled={!mapboxToken.trim()}
               >
-                지도 로드
+                경로 지도 로드
               </Button>
             </div>
           </div>

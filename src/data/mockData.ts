@@ -9,6 +9,7 @@ export const mockCourses = [
     distance: 3.5,
     estimatedTime: '25분',
     likes: 142,
+    completedCount: 87, // 완주한 사람 수 추가
     isLiked: false,
     author: '러닝매니아',
     createdAt: '2024-06-15',
@@ -22,7 +23,10 @@ export const mockCourses = [
       [126.9376, 37.5237],
       [126.9386, 37.5243],
       [126.9396, 37.5249],
-      [126.9406, 37.5255]
+      [126.9406, 37.5255],
+      [126.9416, 37.5261],
+      [126.9426, 37.5267],
+      [126.9436, 37.5273]
     ],
     region: '서울',
     district: '영등포구'
@@ -36,6 +40,7 @@ export const mockCourses = [
     distance: 4.2,
     estimatedTime: '35분',
     likes: 98,
+    completedCount: 63,
     isLiked: true,
     author: '산악러너',
     createdAt: '2024-06-10',
@@ -48,7 +53,9 @@ export const mockCourses = [
       [126.9903, 37.5523],
       [126.9913, 37.5531],
       [126.9923, 37.5539],
-      [126.9933, 37.5547]
+      [126.9933, 37.5547],
+      [126.9943, 37.5555],
+      [126.9953, 37.5563]
     ],
     region: '서울',
     district: '중구'
@@ -62,6 +69,7 @@ export const mockCourses = [
     distance: 2.8,
     estimatedTime: '20분',
     likes: 76,
+    completedCount: 124,
     isLiked: false,
     author: '도심러너',
     createdAt: '2024-06-12',
@@ -73,7 +81,9 @@ export const mockCourses = [
       [126.9794, 37.5702],
       [126.9804, 37.5710],
       [126.9814, 37.5718],
-      [126.9824, 37.5726]
+      [126.9824, 37.5726],
+      [126.9834, 37.5734],
+      [126.9844, 37.5742]
     ],
     region: '서울',
     district: '종로구'
@@ -87,6 +97,7 @@ export const mockCourses = [
     distance: 5.0,
     estimatedTime: '40분',
     likes: 124,
+    completedCount: 95,
     isLiked: false,
     author: '공원애호가',
     createdAt: '2024-06-08',
@@ -99,7 +110,10 @@ export const mockCourses = [
       [127.1239, 37.5231],
       [127.1249, 37.5237],
       [127.1259, 37.5243],
-      [127.1269, 37.5249]
+      [127.1269, 37.5249],
+      [127.1279, 37.5255],
+      [127.1289, 37.5261],
+      [127.1299, 37.5267]
     ],
     region: '서울',
     district: '송파구'
@@ -113,6 +127,7 @@ export const mockCourses = [
     distance: 7.5,
     estimatedTime: '55분',
     likes: 89,
+    completedCount: 42,
     isLiked: true,
     author: '마라톤러너',
     createdAt: '2024-06-05',
@@ -126,7 +141,11 @@ export const mockCourses = [
       [126.9986, 37.5157],
       [126.9996, 37.5165],
       [127.0006, 37.5173],
-      [127.0016, 37.5181]
+      [127.0016, 37.5181],
+      [127.0026, 37.5189],
+      [127.0036, 37.5197],
+      [127.0046, 37.5205],
+      [127.0056, 37.5213]
     ],
     region: '서울',
     district: '서초구'

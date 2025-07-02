@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CourseMap } from './CourseMap';
 import { CourseDetail } from './CourseDetail';
 import { LocationFilter } from './LocationFilter';
-import { Heart, MapPin, Clock, TrendingUp, Calendar } from 'lucide-react';
+import { Heart, MapPin, Clock, TrendingUp, Calendar, Users } from 'lucide-react';
 import { mockCourses } from '../../data/mockData';
 
 export const CourseExplorer = () => {
@@ -136,18 +136,24 @@ export const CourseExplorer = () => {
                       </span>
                       <span>예상 {course.estimatedTime}</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLike(course.id);
-                      }}
-                      className={`flex items-center gap-1 ${course.isLiked ? 'text-red-500' : 'text-gray-500'}`}
-                    >
-                      <Heart className={`w-4 h-4 ${course.isLiked ? 'fill-current' : ''}`} />
-                      {course.likes}
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Users className="w-4 h-4" />
+                        <span className="text-sm font-medium">{course.completedCount}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike(course.id);
+                        }}
+                        className={`flex items-center gap-1 ${course.isLiked ? 'text-red-500' : 'text-gray-500'}`}
+                      >
+                        <Heart className={`w-4 h-4 ${course.isLiked ? 'fill-current' : ''}`} />
+                        {course.likes}
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-sm text-gray-700 line-clamp-2">{course.description}</p>
                   <div className="mt-3 text-xs text-gray-500">
