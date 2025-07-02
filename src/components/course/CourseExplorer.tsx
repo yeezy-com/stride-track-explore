@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { CourseMap } from './CourseMap';
 import { CourseDetail } from './CourseDetail';
 import { LocationFilter } from './LocationFilter';
@@ -166,16 +167,20 @@ export const CourseExplorer = () => {
         </div>
 
         <div className="lg:sticky lg:top-24">
-          {selectedCourse ? (
+          <CourseMap courses={filteredCourses} onCourseSelect={setSelectedCourse} />
+        </div>
+      </div>
+
+      <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedCourse && (
             <CourseDetail 
               course={selectedCourse} 
               onClose={() => setSelectedCourse(null)} 
             />
-          ) : (
-            <CourseMap courses={filteredCourses} onCourseSelect={setSelectedCourse} />
           )}
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
