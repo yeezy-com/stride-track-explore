@@ -4,8 +4,9 @@ import { Header } from '../components/layout/Header';
 import { CourseExplorer } from '../components/course/CourseExplorer';
 import { LiveTracking } from '../components/tracking/LiveTracking';
 import { CreateCourse } from '../components/course/CreateCourse';
+import { MyRecords } from '../components/records/MyRecords';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Map, Activity, Plus } from 'lucide-react';
+import { Map, Activity, Plus, BarChart3 } from 'lucide-react';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('explore');
@@ -25,7 +26,7 @@ const Index = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="explore" className="flex items-center gap-2">
               <Map className="w-4 h-4" />
               코스 둘러보기
@@ -37,6 +38,10 @@ const Index = () => {
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               코스 만들기
+            </TabsTrigger>
+            <TabsTrigger value="records" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              나의 기록
             </TabsTrigger>
           </TabsList>
 
@@ -50,6 +55,10 @@ const Index = () => {
 
           <TabsContent value="create" className="mt-0">
             <CreateCourse />
+          </TabsContent>
+
+          <TabsContent value="records" className="mt-0">
+            <MyRecords />
           </TabsContent>
         </Tabs>
       </main>

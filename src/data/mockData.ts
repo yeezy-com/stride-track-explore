@@ -13,7 +13,19 @@ export const mockCourses = [
     author: '러닝매니아',
     createdAt: '2024-06-15',
     coordinates: [126.9346, 37.5219],
-    tags: ['일몰', '한강', '초보자', '야경']
+    tags: ['일몰', '한강', '초보자', '야경'],
+    elevationProfile: [5, 8, 12, 15, 18, 20, 22, 18, 15, 12, 8, 5],
+    routeCoordinates: [
+      [126.9346, 37.5219],
+      [126.9356, 37.5225],
+      [126.9366, 37.5231],
+      [126.9376, 37.5237],
+      [126.9386, 37.5243],
+      [126.9396, 37.5249],
+      [126.9406, 37.5255]
+    ],
+    region: '서울',
+    district: '영등포구'
   },
   {
     id: '2',
@@ -28,7 +40,18 @@ export const mockCourses = [
     author: '산악러너',
     createdAt: '2024-06-10',
     coordinates: [126.9883, 37.5507],
-    tags: ['남산', '전망', '힐링', '자연']
+    tags: ['남산', '전망', '힐링', '자연'],
+    elevationProfile: [45, 55, 70, 85, 110, 135, 160, 180, 195, 210, 185, 160],
+    routeCoordinates: [
+      [126.9883, 37.5507],
+      [126.9893, 37.5515],
+      [126.9903, 37.5523],
+      [126.9913, 37.5531],
+      [126.9923, 37.5539],
+      [126.9933, 37.5547]
+    ],
+    region: '서울',
+    district: '중구'
   },
   {
     id: '3',
@@ -43,7 +66,17 @@ export const mockCourses = [
     author: '도심러너',
     createdAt: '2024-06-12',
     coordinates: [126.9784, 37.5694],
-    tags: ['도심', '접근성', '청계천', '직장인']
+    tags: ['도심', '접근성', '청계천', '직장인'],
+    elevationProfile: [25, 22, 18, 15, 12, 10, 8, 5, 3, 1, 2, 5],
+    routeCoordinates: [
+      [126.9784, 37.5694],
+      [126.9794, 37.5702],
+      [126.9804, 37.5710],
+      [126.9814, 37.5718],
+      [126.9824, 37.5726]
+    ],
+    region: '서울',
+    district: '종로구'
   },
   {
     id: '4',
@@ -58,7 +91,18 @@ export const mockCourses = [
     author: '공원애호가',
     createdAt: '2024-06-08',
     coordinates: [127.1219, 37.5219],
-    tags: ['공원', '벚꽃', '계절', '다양한루트']
+    tags: ['공원', '벚꽃', '계절', '다양한루트'],
+    elevationProfile: [35, 40, 50, 65, 75, 85, 90, 85, 75, 65, 50, 40],
+    routeCoordinates: [
+      [127.1219, 37.5219],
+      [127.1229, 37.5225],
+      [127.1239, 37.5231],
+      [127.1249, 37.5237],
+      [127.1259, 37.5243],
+      [127.1269, 37.5249]
+    ],
+    region: '서울',
+    district: '송파구'
   },
   {
     id: '5',
@@ -73,6 +117,107 @@ export const mockCourses = [
     author: '마라톤러너',
     createdAt: '2024-06-05',
     coordinates: [126.9956, 37.5133],
-    tags: ['장거리', '한강', '체력향상', '잠수교']
+    tags: ['장거리', '한강', '체력향상', '잠수교'],
+    elevationProfile: [8, 12, 15, 18, 22, 25, 28, 30, 28, 25, 22, 18, 15, 12, 8],
+    routeCoordinates: [
+      [126.9956, 37.5133],
+      [126.9966, 37.5141],
+      [126.9976, 37.5149],
+      [126.9986, 37.5157],
+      [126.9996, 37.5165],
+      [127.0006, 37.5173],
+      [127.0016, 37.5181]
+    ],
+    region: '서울',
+    district: '서초구'
   }
+];
+
+export const mockRunningRecords = [
+  {
+    id: '1',
+    courseId: '1',
+    courseName: '한강 여의도 일몰 코스',
+    date: '2024-06-20',
+    time: '18:30',
+    duration: '24:35',
+    distance: 3.5,
+    pace: '7:01',
+    calories: 245,
+    averageHeartRate: 145,
+    maxHeartRate: 168,
+    weather: '맑음',
+    temperature: '25°C',
+    notes: '오늘은 일몰이 정말 아름다웠습니다. 페이스도 목표보다 빨랐어요!'
+  },
+  {
+    id: '2',
+    courseId: '2',
+    courseName: '남산 힐링 트레일',
+    date: '2024-06-18',
+    time: '07:00',
+    duration: '38:22',
+    distance: 4.2,
+    pace: '9:08',
+    calories: 395,
+    averageHeartRate: 158,
+    maxHeartRate: 182,
+    weather: '흐림',
+    temperature: '22°C',
+    notes: '언덕이 힘들었지만 정상에서 본 뷰가 최고였습니다.'
+  },
+  {
+    id: '3',
+    courseId: '3',
+    courseName: '청계천 도심 런닝',
+    date: '2024-06-15',
+    time: '12:00',
+    duration: '19:45',
+    distance: 2.8,
+    pace: '7:04',
+    calories: 198,
+    averageHeartRate: 140,
+    maxHeartRate: 162,
+    weather: '맑음',
+    temperature: '28°C',
+    notes: '점심시간 러닝! 짧지만 상쾌한 런이었습니다.'
+  },
+  {
+    id: '4',
+    courseId: '4',
+    courseName: '올림픽공원 벚꽃길',
+    date: '2024-06-12',
+    time: '06:30',
+    duration: '42:18',
+    distance: 5.0,
+    pace: '8:28',
+    calories: 445,
+    averageHeartRate: 152,
+    maxHeartRate: 175,
+    weather: '맑음',
+    temperature: '20°C',
+    notes: '새벽 러닝의 매력을 다시 느꼈습니다. 공기가 정말 좋았어요.'
+  },
+  {
+    id: '5',
+    courseId: '1',
+    courseName: '한강 여의도 일몰 코스',
+    date: '2024-06-10',
+    time: '19:15',
+    duration: '26:12',
+    distance: 3.5,
+    pace: '7:29',
+    calories: 238,
+    averageHeartRate: 142,
+    maxHeartRate: 165,
+    weather: '맑음',
+    temperature: '24°C',
+    notes: '어제보다 조금 느렸지만 컨디션은 좋았습니다.'
+  }
+];
+
+export const seoulDistricts = [
+  '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+  '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+  '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'
 ];

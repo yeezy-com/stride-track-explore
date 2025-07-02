@@ -52,6 +52,36 @@ export const CourseDetail = ({ course, onClose }) => {
           </div>
         </div>
 
+        {/* 고도 정보 추가 */}
+        {course.elevationProfile && (
+          <>
+            <Separator />
+            <div>
+              <h3 className="font-semibold mb-3 text-gray-800">고도 정보</h3>
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                <div>
+                  <div className="text-lg font-bold text-green-600">
+                    {Math.max(...course.elevationProfile)}m
+                  </div>
+                  <div className="text-xs text-gray-600">최고 고도</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-blue-600">
+                    {Math.min(...course.elevationProfile)}m
+                  </div>
+                  <div className="text-xs text-gray-600">최저 고도</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-purple-600">
+                    {Math.max(...course.elevationProfile) - Math.min(...course.elevationProfile)}m
+                  </div>
+                  <div className="text-xs text-gray-600">고도차</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         <Separator />
 
         <div>
@@ -80,6 +110,15 @@ export const CourseDetail = ({ course, onClose }) => {
                 {new Date(course.createdAt).toLocaleDateString('ko-KR')}
               </span>
             </div>
+            {course.region && (
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-gray-600">
+                  <MapPin className="w-4 h-4" />
+                  지역
+                </span>
+                <span className="font-medium">{course.region} {course.district}</span>
+              </div>
+            )}
           </div>
         </div>
 
