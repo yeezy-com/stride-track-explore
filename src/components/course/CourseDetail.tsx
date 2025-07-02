@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,53 @@ import { Separator } from '@/components/ui/separator';
 import { X, MapPin, Clock, TrendingUp, User, Calendar, Heart, Play, Users } from 'lucide-react';
 
 export const CourseDetail = ({ course, onClose }) => {
+  // Simple route visualization
+  const renderRouteVisualization = () => {
+    if (!course.routeCoordinates || course.routeCoordinates.length < 2) {
+      return (
+        <div className="bg-gray-100 rounded-lg p-4 h-48 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <MapPin className="w-8 h-8 text-blue-500 mx-auto" />
+            <div className="text-sm text-gray-600">경로 데이터가 없습니다</div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-slate-50 rounded-lg p-4 h-48 overflow-hidden">
+        <svg width="100%" height="100%" viewBox="0 0 300 150" className="border border-gray-200 rounded">
+          {/* Background */}
+          <rect width="300" height="150" fill="#f8fafc" />
+          
+          {/* Simple route path */}
+          <path
+            d={`M 20 75 Q 75 40 150 75 Q 225 110 280 75`}
+            stroke="#3B82F6"
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
+          />
+          
+          {/* Start and end markers */}
+          <circle cx="20" cy="75" r="6" fill="#10B981" />
+          <circle cx="280" cy="75" r="6" fill="#EF4444" />
+          
+          {/* Labels */}
+          <text x="25" y="70" className="text-xs fill-green-600 font-semibold">시작</text>
+          <text x="250" y="70" className="text-xs fill-red-600 font-semibold">종료</text>
+          
+          {/* Distance indicator */}
+          <text x="150" y="95" className="text-xs fill-gray-600 text-center">{course.distance}km</text>
+        </svg>
+        
+        <div className="mt-2 text-xs text-gray-600 text-center">
+          총 {course.routeCoordinates.length}개 지점을 거치는 코스입니다
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="h-[600px] flex flex-col">
       <CardHeader className="pb-4">
@@ -56,27 +102,12 @@ export const CourseDetail = ({ course, onClose }) => {
           </div>
         </div>
 
-        {/* 경로 지도 표시 영역 */}
         <Separator />
         <div>
           <h3 className="font-semibold mb-3 text-gray-800">코스 경로</h3>
-          <div className="bg-gray-100 rounded-lg p-4 h-48 flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <MapPin className="w-8 h-8 text-blue-500 mx-auto" />
-              <div className="text-sm text-gray-600">
-                <div className="font-medium">총 {course.routeCoordinates?.length || 0}개 지점</div>
-                <div className="text-xs mt-1">
-                  시작: {course.routeCoordinates?.[0]?.[1].toFixed(4)}, {course.routeCoordinates?.[0]?.[0].toFixed(4)}
-                </div>
-                <div className="text-xs">
-                  종료: {course.routeCoordinates?.[course.routeCoordinates.length-1]?.[1].toFixed(4)}, {course.routeCoordinates?.[course.routeCoordinates.length-1]?.[0].toFixed(4)}
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderRouteVisualization()}
         </div>
 
-        {/* 고도 정보 추가 */}
         {course.elevationProfile && (
           <>
             <Separator />
