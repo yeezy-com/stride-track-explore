@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, MapPin, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCourses } from '../../contexts/CourseContext';
 
 export const CreateCourse = () => {
+  const { addCourse } = useCourses();
   const [courseData, setCourseData] = useState({
     name: '',
     location: '',
@@ -51,7 +52,17 @@ export const CreateCourse = () => {
       return;
     }
 
-    // 여기서 실제로는 서버에 데이터를 저장합니다
+    // 새 코스를 context에 추가
+    addCourse({
+      name: courseData.name,
+      location: courseData.location,
+      description: courseData.description,
+      difficulty: courseData.difficulty,
+      distance: parseFloat(courseData.distance) || 0,
+      estimatedTime: courseData.estimatedTime || '미정',
+      tags: courseData.tags
+    });
+
     console.log('새 코스 저장:', courseData);
     toast.success('러닝 코스가 성공적으로 생성되었습니다!');
     

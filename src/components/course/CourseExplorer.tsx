@@ -6,30 +6,28 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { MapPin, Clock, Heart, Users, Search, Filter, Play } from 'lucide-react';
-import { mockCourses } from '../../data/mockData';
 import { CourseMap } from './CourseMap';
 import { CourseDetail } from './CourseDetail';
 import { LocationFilter } from './LocationFilter';
+import { useCourses } from '../../contexts/CourseContext';
 
 export const CourseExplorer = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('전체');
   const [selectedDifficulty, setSelectedDifficulty] = useState('전체');
-  const [courses] = useState(mockCourses);
+  const { courses } = useCourses();
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = selectedLocation === '전체' || course.location.includes(selectedLocation);
-    // 난이도 필터링 수정
     const matchesDifficulty = selectedDifficulty === '전체' || course.difficulty === selectedDifficulty;
     
     return matchesSearch && matchesLocation && matchesDifficulty;
   });
 
   const handleStartRunning = (course: any) => {
-    // 실시간 러닝 탭으로 전환하는 이벤트 발생
     const event = new CustomEvent('startRunningWithCourse', { detail: course });
     window.dispatchEvent(event);
     setSelectedCourse(null);
@@ -132,7 +130,7 @@ export const CourseExplorer = () => {
                   </Button>
                 </div>
                 
-                {course.tags && (
+                {course.tags && course.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {course.tags.slice(0, 3).map((tag: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">
