@@ -21,15 +21,6 @@ export const CourseExplorer = () => {
   // Context에서 가져온 courses가 비어있으면 mockCourses 사용
   const displayCourses = courses.length > 0 ? courses : mockCourses;
 
-  const filteredCourses = displayCourses.filter(course => {
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = selectedLocation === '전체' || course.location.includes(selectedLocation);
-    const matchesDifficulty = selectedDifficulty === '전체' || course.difficulty === selectedDifficulty;
-    
-    return matchesSearch && matchesLocation && matchesDifficulty;
-  });
-
   const handleStartRunning = (course: any) => {
     const event = new CustomEvent('startRunningWithCourse', { detail: course });
     window.dispatchEvent(event);
@@ -77,17 +68,13 @@ export const CourseExplorer = () => {
         </div>
 
         <div className="space-y-4 max-h-[600px] overflow-y-auto">
-          {filteredCourses.length === 0 ? (
+          {displayCourses.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-2">
-                {displayCourses.length === 0 ? '러닝 코스를 불러오는 중...' : '검색 조건에 맞는 코스가 없습니다.'}
-              </p>
-              {displayCourses.length === 0 && (
-                <p className="text-sm text-gray-400">잠시만 기다려주세요.</p>
-              )}
+              <p className="text-gray-500 mb-2">러닝 코스를 불러오는 중...</p>
+              <p className="text-sm text-gray-400">잠시만 기다려주세요.</p>
             </div>
           ) : (
-            filteredCourses.map((course) => (
+            displayCourses.map((course) => (
               <Card 
                 key={course.id}
                 className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
