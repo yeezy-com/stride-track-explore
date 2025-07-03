@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Square, MapPin, Clock, Activity, Target } from 'lucide-react';
+import { Play, Pause, Square, MapPin, Clock, Activity, Target, CheckCircle, AlertCircle } from 'lucide-react';
 import { RunningStats } from './RunningStats';
 import { LiveMap } from './LiveMap';
+import { useToast } from '@/hooks/use-toast';
 
 export const LiveTracking = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -15,6 +16,24 @@ export const LiveTracking = () => {
   const [distance, setDistance] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [route, setRoute] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [trackingStatus, setTrackingStatus] = useState('on-track'); // 'on-track', 'off-track', 'completed'
+  const { toast } = useToast();
+
+  // 코스 선택 이벤트 리스너
+  useEffect(() => {
+    const handleStartRunning = (event) => {
+      const course = event.detail;
+      setSelectedCourse(course);
+      toast({
+        title: "코스 선택됨",
+        description: `${course.name} 코스가 선택되었습니다. 러닝을 시작해보세요!`,
+      });
+    };
+
+    window.addEventListener('startRunningWithCourse', handleStartRunning);
+    return () => window.removeEventListener('startRunningWithCourse', handleStartRunning);
+  }, [toast]);
 
   useEffect(() => {
     let interval;
@@ -48,6 +67,12 @@ export const LiveTracking = () => {
               );
               setDistance(prevDistance => prevDistance + dist);
             }
+
+            // 코스 트랙 추적 확인
+            if (selectedCourse && selectedCourse.routeCoordinates) {
+              checkTrackingStatus(newLocation, selectedCourse.routeCoordinates);
+            }
+
             return newRoute;
           });
         },
@@ -63,7 +88,7 @@ export const LiveTracking = () => {
 
       return () => navigator.geolocation.clearWatch(watchId);
     }
-  }, [isRunning, isPaused]);
+  }, [isRunning, isPaused, selectedCourse]);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // 지구 반지름 (km)
@@ -75,6 +100,46 @@ export const LiveTracking = () => {
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
+  };
+
+  const checkTrackingStatus = (currentLocation, courseRoute) => {
+    // 현재 위치와 코스 경로의 가장 가까운 점 사이의 거리 확인
+    let minDistance = Infinity;
+    courseRoute.forEach(point => {
+      const dist = calculateDistance(
+        currentLocation.latitude, currentLocation.longitude,
+        point[1], point[0]
+      );
+      minDistance = Math.min(minDistance, dist);
+    });
+
+    // 50미터 이내면 올바른 경로, 그 이상이면 벗어남
+    if (minDistance <= 0.05) { // 0.05km = 50m
+      if (trackingStatus !== 'on-track') {
+        setTrackingStatus('on-track');
+        toast({
+          title: "경로 복귀",
+          description: "코스 경로로 돌아왔습니다!",
+        });
+      }
+    } else {
+      if (trackingStatus !== 'off-track') {
+        setTrackingStatus('off-track');
+        toast({
+          title: "경로 이탈",
+          description: "코스 경로에서 벗어났습니다. 경로를 확인해주세요.",
+        });
+      }
+    }
+
+    // 목표 거리 달성 확인
+    if (selectedCourse && distance >= selectedCourse.distance && trackingStatus !== 'completed') {
+      setTrackingStatus('completed');
+      toast({
+        title: "코스 완주!",
+        description: `${selectedCourse.name} 코스를 완주했습니다!`,
+      });
+    }
   };
 
   const formatTime = (ms) => {
@@ -91,6 +156,7 @@ export const LiveTracking = () => {
     setElapsedTime(0);
     setDistance(0);
     setRoute([]);
+    setTrackingStatus('on-track');
   };
 
   const pauseRunning = () => {
@@ -98,10 +164,42 @@ export const LiveTracking = () => {
   };
 
   const stopRunning = () => {
+    if (isRunning) {
+      // 러닝 기록 저장
+      const runningRecord = {
+        id: Date.now(),
+        courseName: selectedCourse ? selectedCourse.name : '자유 러닝',
+        courseId: selectedCourse ? selectedCourse.id : null,
+        date: new Date().toLocaleDateString('ko-KR'),
+        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+        distance: distance.toFixed(2),
+        duration: formatTime(elapsedTime),
+        pace: distance > 0 ? `${((elapsedTime / 1000 / 60) / distance).toFixed(1)}분/km` : '0분/km',
+        calories: Math.floor(distance * 65),
+        averageHeartRate: Math.floor(Math.random() * 40) + 140,
+        maxHeartRate: Math.floor(Math.random() * 30) + 170,
+        weather: '맑음',
+        temperature: '22°C',
+        notes: selectedCourse ? `${selectedCourse.name} 코스로 러닝 완료` : '자유 러닝 완료',
+        route: route
+      };
+
+      // localStorage에 기록 저장
+      const existingRecords = JSON.parse(localStorage.getItem('runningRecords') || '[]');
+      existingRecords.unshift(runningRecord);
+      localStorage.setItem('runningRecords', JSON.stringify(existingRecords));
+
+      toast({
+        title: "러닝 완료!",
+        description: "러닝 기록이 저장되었습니다.",
+      });
+    }
+
     setIsRunning(false);
     setIsPaused(false);
     setStartTime(null);
-    // 여기서 러닝 데이터를 저장할 수 있습니다
+    setSelectedCourse(null);
+    setTrackingStatus('on-track');
   };
 
   const averagePace = distance > 0 ? (elapsedTime / 1000 / 60) / distance : 0;
@@ -109,6 +207,38 @@ export const LiveTracking = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="space-y-6">
+        {selectedCourse && (
+          <Card className="bg-gradient-to-br from-green-50 to-blue-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-green-500" />
+                선택된 코스
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedCourse.name}</h3>
+                  <p className="text-sm text-gray-600">{selectedCourse.location}</p>
+                  <p className="text-sm text-gray-600">{selectedCourse.distance}km • {selectedCourse.difficulty}</p>
+                </div>
+                <div className="text-right">
+                  <Badge 
+                    variant={trackingStatus === 'on-track' ? 'default' : trackingStatus === 'off-track' ? 'destructive' : 'default'}
+                  >
+                    {trackingStatus === 'on-track' && <CheckCircle className="w-3 h-3 mr-1" />}
+                    {trackingStatus === 'off-track' && <AlertCircle className="w-3 h-3 mr-1" />}
+                    {trackingStatus === 'completed' && <CheckCircle className="w-3 h-3 mr-1" />}
+                    {trackingStatus === 'on-track' && '경로 추적 중'}
+                    {trackingStatus === 'off-track' && '경로 이탈'}
+                    {trackingStatus === 'completed' && '완주!'}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="bg-gradient-to-br from-blue-50 to-green-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -193,6 +323,8 @@ export const LiveTracking = () => {
           distance={distance}
           route={route}
           isRunning={isRunning}
+          selectedCourse={selectedCourse}
+          trackingStatus={trackingStatus}
         />
       </div>
 
@@ -201,6 +333,7 @@ export const LiveTracking = () => {
           currentLocation={currentLocation}
           route={route}
           isRunning={isRunning}
+          selectedCourse={selectedCourse}
         />
       </div>
     </div>

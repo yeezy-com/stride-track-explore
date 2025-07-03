@@ -11,6 +11,16 @@ import { Map, Activity, Plus, BarChart3 } from 'lucide-react';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('explore');
 
+  // 코스 선택시 실시간 러닝 탭으로 전환하는 이벤트 리스너
+  React.useEffect(() => {
+    const handleStartRunning = () => {
+      setActiveTab('track');
+    };
+
+    window.addEventListener('startRunningWithCourse', handleStartRunning);
+    return () => window.removeEventListener('startRunningWithCourse', handleStartRunning);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <Header />

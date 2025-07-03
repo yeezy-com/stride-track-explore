@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,14 @@ import { RecordDetail } from './RecordDetail';
 
 export const MyRecords = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [records] = useState(mockRunningRecords);
+  const [records, setRecords] = useState(mockRunningRecords);
+
+  // localStorage에서 실시간 러닝 기록 불러오기
+  useEffect(() => {
+    const savedRecords = JSON.parse(localStorage.getItem('runningRecords') || '[]');
+    const combinedRecords = [...savedRecords, ...mockRunningRecords];
+    setRecords(combinedRecords);
+  }, []);
 
   const getRecentRecords = () => {
     return records

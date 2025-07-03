@@ -1,174 +1,156 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { MapPin, Clock, Heart, Users, Search, Filter, Play } from 'lucide-react';
+import { mockCourses } from '../../data/mockData';
 import { CourseMap } from './CourseMap';
 import { CourseDetail } from './CourseDetail';
 import { LocationFilter } from './LocationFilter';
-import { Heart, MapPin, Clock, TrendingUp, Calendar, Users } from 'lucide-react';
-import { mockCourses } from '../../data/mockData';
 
 export const CourseExplorer = () => {
-  const [courses, setCourses] = useState(mockCourses);
-  const [filteredCourses, setFilteredCourses] = useState(mockCourses);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [sortBy, setSortBy] = useState('popular');
-  const [locationFilter, setLocationFilter] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('전체');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('전체');
+  const [courses] = useState(mockCourses);
 
-  // 위치 필터링 로직
-  useEffect(() => {
-    let filtered = [...courses];
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLocation = selectedLocation === '전체' || course.location.includes(selectedLocation);
+    const matchesDifficulty = selectedDifficulty === '전체' || course.difficulty === selectedDifficulty;
+    
+    return matchesSearch && matchesLocation && matchesDifficulty;
+  });
 
-    if (locationFilter) {
-      if (locationFilter.type === 'nearby' && locationFilter.location) {
-        // 간단한 거리 계산 (실제로는 더 정확한 계산 필요)
-        filtered = filtered.filter(course => {
-          const distance = calculateDistance(
-            locationFilter.location.latitude,
-            locationFilter.location.longitude,
-            course.coordinates[1],
-            course.coordinates[0]
-          );
-          return distance <= locationFilter.radius;
-        });
-      } else if (locationFilter.type === 'region') {
-        if (locationFilter.region !== '전체') {
-          filtered = filtered.filter(course => course.region === locationFilter.region);
-        }
-        if (locationFilter.district !== '전체') {
-          filtered = filtered.filter(course => course.district === locationFilter.district);
-        }
-      }
-    }
-
-    // 정렬
-    filtered.sort((a, b) => {
-      if (sortBy === 'popular') {
-        return b.likes - a.likes;
-      } else {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-    });
-
-    setFilteredCourses(filtered);
-  }, [courses, locationFilter, sortBy]);
-
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // 지구 반지름 (km)
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  const handleLike = (courseId: string) => {
-    setCourses(courses.map(course => 
-      course.id === courseId 
-        ? { ...course, likes: course.likes + 1, isLiked: !course.isLiked }
-        : course
-    ));
+  const handleStartRunning = (course: any) => {
+    // 실시간 러닝 탭으로 전환하는 이벤트 발생
+    const event = new CustomEvent('startRunningWithCourse', { detail: course });
+    window.dispatchEvent(event);
+    setSelectedCourse(null);
   };
 
   return (
-    <div className="space-y-6">
-      <LocationFilter 
-        onLocationChange={setLocationFilter} 
-        currentLocation={locationFilter} 
-      />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">러닝 코스</h2>
-            <Tabs value={sortBy} onValueChange={setSortBy}>
-              <TabsList>
-                <TabsTrigger value="popular" className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  인기순
-                </TabsTrigger>
-                <TabsTrigger value="recent" className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  최신순
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">러닝 코스 둘러보기</h2>
+          <p className="text-gray-600">다양한 러닝 코스를 탐색하고 새로운 경험을 시작해보세요</p>
+        </div>
 
-          <div className="text-sm text-gray-600 mb-4">
-            총 {filteredCourses.length}개의 코스
+        <div className="flex gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="코스명이나 지역으로 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
+          <LocationFilter 
+            selectedLocation={selectedLocation}
+            onLocationChange={setSelectedLocation}
+          />
+        </div>
 
-          <div className="space-y-4 max-h-[600px] overflow-y-auto">
-            {filteredCourses.map((course) => (
-              <Card 
-                key={course.id} 
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
-                onClick={() => setSelectedCourse(course)}
+        <div className="flex gap-2">
+          <Filter className="w-4 h-4 mt-1 text-gray-500" />
+          <div className="flex gap-2">
+            {['전체', '쉬움', '보통', '어려움'].map((difficulty) => (
+              <Button
+                key={difficulty}
+                variant={selectedDifficulty === difficulty ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedDifficulty(difficulty)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-gray-800">
-                        {course.name}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                        <MapPin className="w-4 h-4" />
-                        {course.location}
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">
-                      {course.difficulty}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {course.distance}km
-                      </span>
-                      <span>예상 {course.estimatedTime}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1 text-blue-600">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm font-medium">{course.completedCount}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLike(course.id);
-                        }}
-                        className={`flex items-center gap-1 ${course.isLiked ? 'text-red-500' : 'text-gray-500'}`}
-                      >
-                        <Heart className={`w-4 h-4 ${course.isLiked ? 'fill-current' : ''}`} />
-                        {course.likes}
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-700 line-clamp-2">{course.description}</p>
-                  <div className="mt-3 text-xs text-gray-500">
-                    by {course.author} • {new Date(course.createdAt).toLocaleDateString('ko-KR')}
-                  </div>
-                </CardContent>
-              </Card>
+                {difficulty}
+              </Button>
             ))}
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-24">
-          <CourseMap courses={filteredCourses} onCourseSelect={setSelectedCourse} />
+        <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          {filteredCourses.map((course) => (
+            <Card 
+              key={course.id}
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
+              onClick={() => setSelectedCourse(course)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-lg font-semibold text-gray-800">
+                    {course.name}
+                  </CardTitle>
+                  <Badge variant={course.difficulty === '쉬움' ? 'default' : course.difficulty === '보통' ? 'secondary' : 'destructive'}>
+                    {course.difficulty}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin className="w-4 h-4" />
+                  {course.location}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">{course.distance}km</div>
+                    <div className="text-xs text-gray-600">거리</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600">{course.estimatedTime}</div>
+                    <div className="text-xs text-gray-600">예상 시간</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-4 h-4" />
+                      {course.likes}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      {course.completedCount}
+                    </span>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartRunning(course);
+                    }}
+                  >
+                    <Play className="w-3 h-3 mr-1" />
+                    시작
+                  </Button>
+                </div>
+                
+                {course.tags && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {course.tags.slice(0, 3).map((tag: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      </div>
+
+      <div className="lg:sticky lg:top-24">
+        <CourseMap 
+          courses={filteredCourses} 
+          onCourseSelect={setSelectedCourse}
+        />
       </div>
 
       <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
@@ -176,7 +158,7 @@ export const CourseExplorer = () => {
           {selectedCourse && (
             <CourseDetail 
               course={selectedCourse} 
-              onClose={() => setSelectedCourse(null)} 
+              onStartRunning={handleStartRunning}
             />
           )}
         </DialogContent>

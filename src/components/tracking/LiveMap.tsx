@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, Activity } from 'lucide-react';
+import { MapPin, Navigation, Activity, Target } from 'lucide-react';
 
-export const LiveMap = ({ currentLocation, route, isRunning }) => {
+export const LiveMap = ({ currentLocation, route, isRunning, selectedCourse }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef(null);
   const [mapboxToken, setMapboxToken] = useState('');
@@ -56,8 +56,55 @@ export const LiveMap = ({ currentLocation, route, isRunning }) => {
           'line-opacity': 0.8
         }
       });
+
+      // 선택된 코스 경로 추가
+      if (selectedCourse && selectedCourse.routeCoordinates) {
+        map.current.addSource('course-route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: selectedCourse.routeCoordinates
+            }
+          }
+        });
+
+        map.current.addLayer({
+          id: 'course-route',
+          type: 'line',
+          source: 'course-route',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': '#10B981',
+            'line-width': 6,
+            'line-opacity': 0.6,
+            'line-dasharray': [2, 2]
+          }
+        });
+      }
     });
   };
+
+  // 선택된 코스 경로 업데이트
+  useEffect(() => {
+    if (map.current && selectedCourse && selectedCourse.routeCoordinates) {
+      if (map.current.getSource('course-route')) {
+        map.current.getSource('course-route').setData({
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: selectedCourse.routeCoordinates
+          }
+        });
+      }
+    }
+  }, [selectedCourse]);
 
   // 현재 위치 업데이트
   useEffect(() => {
@@ -129,6 +176,12 @@ export const LiveMap = ({ currentLocation, route, isRunning }) => {
               추적 중
             </div>
           )}
+          {selectedCourse && (
+            <div className="ml-auto flex items-center gap-1 text-sm text-blue-600">
+              <Target className="w-4 h-4" />
+              코스 경로
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 h-[calc(100%-80px)]">
@@ -140,6 +193,11 @@ export const LiveMap = ({ currentLocation, route, isRunning }) => {
               <p className="text-sm text-gray-600">
                 GPS 추적과 경로 표시를 위해 Mapbox 토큰이 필요합니다
               </p>
+              {selectedCourse && (
+                <p className="text-sm text-blue-600 font-medium">
+                  선택된 코스: {selectedCourse.name}
+                </p>
+              )}
               <a 
                 href="https://mapbox.com/" 
                 target="_blank" 
