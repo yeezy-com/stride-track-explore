@@ -1,6 +1,6 @@
 export const mockCourses = [
   {
-    id: '1',
+    id: 1,
     name: '한강 여의도 일몰 코스',
     location: '서울 여의도한강공원',
     description: '한강을 따라 달리며 아름다운 일몰을 감상할 수 있는 코스입니다. 평탄한 길로 초보자도 쉽게 달릴 수 있으며, 저녁 시간대에 특히 인기가 많습니다.',
@@ -31,7 +31,7 @@ export const mockCourses = [
     district: '영등포구'
   },
   {
-    id: '2',
+    id: 2,
     name: '남산 힐링 트레일',
     location: '서울 남산공원',
     description: '남산의 자연을 만끽하며 달릴 수 있는 코스입니다. 적당한 경사와 함께 서울 시내 전망을 즐길 수 있어 많은 러너들이 찾는 명소입니다.',
@@ -60,7 +60,7 @@ export const mockCourses = [
     district: '중구'
   },
   {
-    id: '3',
+    id: 3,
     name: '청계천 도심 런닝',
     location: '서울 청계천',
     description: '도심 속에서 즐기는 특별한 러닝 경험. 청계천을 따라 달리며 도시의 활기를 느낄 수 있는 코스입니다. 접근성이 좋아 직장인들에게 인기입니다.',
@@ -88,7 +88,7 @@ export const mockCourses = [
     district: '종로구'
   },
   {
-    id: '4',
+    id: 4,
     name: '올림픽공원 벚꽃길',
     location: '서울 올림픽공원',
     description: '넓은 공원을 활용한 다양한 루트 선택이 가능한 코스입니다. 계절마다 다른 매력을 보여주며, 특히 봄철 벚꽃이 아름답습니다.',
@@ -118,7 +118,7 @@ export const mockCourses = [
     district: '송파구'
   },
   {
-    id: '5',
+    id: 5,
     name: '한강 잠수교 왕복',
     location: '서울 반포한강공원',
     description: '잠수교를 중심으로 한 왕복 코스로, 한강의 웅장함을 제대로 느낄 수 있습니다. 거리가 길어 체력 향상에 도움이 되는 고급 코스입니다.',
@@ -150,7 +150,7 @@ export const mockCourses = [
     district: '서초구'
   },
   {
-    id: '6',
+    id: 6,
     name: '뚝섬한강공원 자전거길',
     location: '서울 뚝섬한강공원',
     description: '자전거길을 따라 달리는 평탄하고 긴 코스입니다. 강바람을 맞으며 시원하게 달릴 수 있어 여름철에 특히 인기가 많습니다.',
@@ -180,7 +180,7 @@ export const mockCourses = [
     district: '성동구'
   },
   {
-    id: '7',
+    id: 7,
     name: '북한산 둘레길 1구간',
     location: '서울 북한산둘레길',
     description: '북한산의 아름다운 자연을 감상하며 달릴 수 있는 산악 코스입니다. 숲길과 계곡을 지나며 힐링할 수 있는 특별한 경험을 제공합니다.',
@@ -208,7 +208,7 @@ export const mockCourses = [
     district: '은평구'
   },
   {
-    id: '8',
+    id: 8,
     name: '잠실종합운동장 트랙',
     location: '서울 잠실종합운동장',
     description: '올림픽 경기장 주변을 도는 공식 트랙 코스입니다. 평탄하고 정확한 거리 측정이 가능해 기록 단축을 목표로 하는 러너들에게 인기입니다.',
@@ -235,7 +235,7 @@ export const mockCourses = [
     district: '송파구'
   },
   {
-    id: '9',
+    id: 9,
     name: '반포 레인보우브릿지 야경',
     location: '서울 반포한강공원',
     description: '반포대교 무지개 분수와 야경을 감상하며 달리는 로맨틱한 코스입니다. 저녁 시간대에 특히 아름다우며 커플 러너들에게 인기가 많습니다.',
@@ -263,7 +263,7 @@ export const mockCourses = [
     district: '서초구'
   },
   {
-    id: '10',
+    id: 10,
     name: '상암 월드컵공원 둘레',
     location: '서울 상암 월드컵공원',
     description: '넓은 공원을 한 바퀴 도는 여유로운 코스입니다. 잔디밭과 나무그늘이 많아 쾌적하게 달릴 수 있으며, 가족 단위 러너들에게 적합합니다.',
@@ -290,7 +290,7 @@ export const mockCourses = [
     district: '마포구'
   },
   {
-    id: '11',
+    id: 11,
     name: '서울숲 생태코스',
     location: '서울 서울숲공원',
     description: '도심 속 숲에서 자연을 만끽하며 달리는 힐링 코스입니다. 다양한 나무와 꽃들을 보며 달릴 수 있어 스트레스 해소에 효과적입니다.',
@@ -317,7 +317,7 @@ export const mockCourses = [
     district: '성동구'
   },
   {
-    id: '12',
+    id: 12,
     name: '용산공원 미래형 코스',
     location: '서울 용산공원',
     description: '새롭게 조성된 용산공원의 현대적인 코스입니다. 깔끔하게 정비된 길과 모던한 시설들이 인상적이며, 미래의 서울을 체험할 수 있습니다.',
@@ -344,7 +344,7 @@ export const mockCourses = [
     district: '용산구'
   },
   {
-    id: '13',
+    id: 13,
     name: '강변 따라 마포대교 코스',
     location: '서울 마포한강공원',
     description: '마포대교를 중심으로 한강변을 따라 달리는 도시적인 코스입니다. 높은 빌딩과 강물이 어우러진 멋진 풍경을 만날 수 있습니다.',
@@ -372,7 +372,7 @@ export const mockCourses = [
     district: '마포구'
   },
   {
-    id: '14',
+    id: 14,
     name: '도봉산 자연트레일',
     location: '서울 도봉산공원',
     description: '도봉산의 아름다운 자연환경에서 트레일 러닝을 즐길 수 있는 코스입니다. 계절마다 변하는 숲의 풍경이 매력적이며, 체력 단련에도 효과적입니다.',
@@ -399,7 +399,7 @@ export const mockCourses = [
     district: '도봉구'
   },
   {
-    id: '15',
+    id: 15,
     name: '어린이대공원 가족코스',
     location: '서울 어린이대공원',
     description: '가족과 함께 즐길 수 있는 평화로운 러닝 코스입니다. 넓은 공원과 다양한 볼거리가 있어 아이들과 함께 운동하기에 완벽합니다.',
@@ -426,7 +426,7 @@ export const mockCourses = [
     district: '광진구'
   },
   {
-    id: '16',
+    id: 16,
     name: '성북천 물소리 코스',
     location: '서울 성북천',
     description: '성북천을 따라 흐르는 물소리를 들으며 달리는 여유로운 코스입니다. 도심 속 작은 자연을 만끽할 수 있어 힐링을 원하는 러너들에게 추천합니다.',
@@ -453,7 +453,7 @@ export const mockCourses = [
     district: '성북구'
   },
   {
-    id: '17',
+    id: 17,
     name: '중랑천 바람길',
     location: '서울 중랑천',
     description: '중랑천을 따라 시원한 바람을 맞으며 달리는 쾌적한 코스입니다. 긴 직선구간이 많아 페이스 연습에 좋으며, 자전거 도로와 분리되어 안전합니다.',
@@ -480,7 +480,7 @@ export const mockCourses = [
     district: '중랑구'
   },
   {
-    id: '18',
+    id: 18,
     name: '광나루한강공원 새벽코스',
     location: '서울 광나루한강공원',
     description: '새벽 일출을 보며 달리는 특별한 코스입니다. 한강의 고요한 아침 풍경과 떠오르는 해가 만드는 황금빛 물결을 감상할 수 있습니다.',
@@ -510,8 +510,8 @@ export const mockCourses = [
 
 export const mockRunningRecords = [
   {
-    id: '1',
-    courseId: '1',
+    id: 1,
+    courseId: 1,
     courseName: '한강 여의도 일몰 코스',
     date: '2024-06-20',
     time: '18:30',
@@ -526,8 +526,8 @@ export const mockRunningRecords = [
     notes: '오늘은 일몰이 정말 아름다웠습니다. 페이스도 목표보다 빨랐어요!'
   },
   {
-    id: '2',
-    courseId: '2',
+    id: 2,
+    courseId: 2,
     courseName: '남산 힐링 트레일',
     date: '2024-06-18',
     time: '07:00',
@@ -542,8 +542,8 @@ export const mockRunningRecords = [
     notes: '언덕이 힘들었지만 정상에서 본 뷰가 최고였습니다.'
   },
   {
-    id: '3',
-    courseId: '3',
+    id: 3,
+    courseId: 3,
     courseName: '청계천 도심 런닝',
     date: '2024-06-15',
     time: '12:00',
@@ -558,8 +558,8 @@ export const mockRunningRecords = [
     notes: '점심시간 러닝! 짧지만 상쾌한 런이었습니다.'
   },
   {
-    id: '4',
-    courseId: '4',
+    id: 4,
+    courseId: 4,
     courseName: '올림픽공원 벚꽃길',
     date: '2024-06-12',
     time: '06:30',
@@ -574,8 +574,8 @@ export const mockRunningRecords = [
     notes: '새벽 러닝의 매력을 다시 느꼈습니다. 공기가 정말 좋았어요.'
   },
   {
-    id: '5',
-    courseId: '1',
+    id: 5,
+    courseId: 1,
     courseName: '한강 여의도 일몰 코스',
     date: '2024-06-10',
     time: '19:15',
