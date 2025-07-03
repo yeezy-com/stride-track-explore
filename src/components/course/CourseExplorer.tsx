@@ -53,7 +53,7 @@ export const CourseExplorer = () => {
             />
           </div>
           <LocationFilter 
-            selectedLocation={selectedLocation}
+            currentLocation={selectedLocation}
             onLocationChange={setSelectedLocation}
           />
         </div>
