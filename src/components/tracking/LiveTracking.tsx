@@ -293,17 +293,29 @@ export const LiveTracking = () => {
           </Card>
 
           <RunningStats 
+            elapsedTime={elapsedTime}
             distance={session.distance}
-            calories={session.calories}
-            pace={session.pace}
-            heartRate={session.heartRate}
+            route={session.routePoints.map(point => ({
+              longitude: point[0],
+              latitude: point[1]
+            }))}
+            isRunning={session.isRunning && !session.isPaused}
+            selectedCourse={session.selectedCourse}
+            trackingStatus={session.distance >= (session.selectedCourse?.distance || 5) ? 'completed' : 'in-progress'}
           />
         </div>
 
         <div>
           <LiveMap 
-            currentPosition={session.currentPosition}
-            routePoints={session.routePoints}
+            currentLocation={session.currentPosition ? {
+              longitude: session.currentPosition[0],
+              latitude: session.currentPosition[1]
+            } : null}
+            route={session.routePoints.map(point => ({
+              longitude: point[0],
+              latitude: point[1]
+            }))}
+            isRunning={session.isRunning && !session.isPaused}
             selectedCourse={session.selectedCourse}
           />
         </div>
