@@ -22,6 +22,7 @@ export const CourseExplorer = () => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = selectedLocation === '전체' || course.location.includes(selectedLocation);
+    // 난이도 필터링 수정
     const matchesDifficulty = selectedDifficulty === '전체' || course.difficulty === selectedDifficulty;
     
     return matchesSearch && matchesLocation && matchesDifficulty;
@@ -61,7 +62,7 @@ export const CourseExplorer = () => {
         <div className="flex gap-2">
           <Filter className="w-4 h-4 mt-1 text-gray-500" />
           <div className="flex gap-2">
-            {['전체', '쉬움', '보통', '어려움'].map((difficulty) => (
+            {['전체', '초급', '중급', '고급'].map((difficulty) => (
               <Button
                 key={difficulty}
                 variant={selectedDifficulty === difficulty ? 'default' : 'outline'}
@@ -86,7 +87,7 @@ export const CourseExplorer = () => {
                   <CardTitle className="text-lg font-semibold text-gray-800">
                     {course.name}
                   </CardTitle>
-                  <Badge variant={course.difficulty === '쉬움' ? 'default' : course.difficulty === '보통' ? 'secondary' : 'destructive'}>
+                  <Badge variant={course.difficulty === '초급' ? 'default' : course.difficulty === '중급' ? 'secondary' : 'destructive'}>
                     {course.difficulty}
                   </Badge>
                 </div>
