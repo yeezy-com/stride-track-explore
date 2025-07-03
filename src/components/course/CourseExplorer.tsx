@@ -67,6 +67,7 @@ export const CourseExplorer = () => {
           </div>
         </div>
 
+        <pre style={{fontSize: 10, color: 'red'}}>{JSON.stringify(displayCourses, null, 2)}</pre>
         <div className="space-y-4 max-h-[600px] overflow-y-auto">
           {displayCourses.length === 0 ? (
             <div className="text-center py-8">
