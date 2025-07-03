@@ -3,18 +3,33 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Clock, Zap, TrendingUp } from 'lucide-react';
 
-export const RecordStats = ({ records }) => {
-  const totalDistance = records.reduce((sum, record) => sum + record.distance, 0);
+interface RecordStatsProps {
+  records: any[];
+}
+
+export const RecordStats: React.FC<RecordStatsProps> = ({ records }) => {
+  const totalDistance = records.reduce((sum, record) => {
+    const distance = typeof record.distance === 'number' ? record.distance : parseFloat(record.distance) || 0;
+    return sum + distance;
+  }, 0);
+  
   const totalRuns = records.length;
-  const totalCalories = records.reduce((sum, record) => sum + record.calories, 0);
+  const totalCalories = records.reduce((sum, record) => {
+    const calories = typeof record.calories === 'number' ? record.calories : parseInt(record.calories) || 0;
+    return sum + calories;
+  }, 0);
   
   // 평균 페이스 계산
   const totalSeconds = records.reduce((sum, record) => {
+    if (!record.pace || typeof record.pace !== 'string') return sum;
     const [minutes, seconds] = record.pace.split(':').map(Number);
-    return sum + (minutes * 60 + seconds);
+    return sum + (minutes * 60 + (seconds || 0));
   }, 0);
-  const avgPaceSeconds = Math.round(totalSeconds / records.length);
-  const avgPace = `${Math.floor(avgPaceSeconds / 60)}:${(avgPaceSeconds % 60).toString().padStart(2, '0')}`;
+  
+  const avgPaceSeconds = records.length > 0 ? Math.round(totalSeconds / records.length) : 0;
+  const avgPace = avgPaceSeconds > 0 ? 
+    `${Math.floor(avgPaceSeconds / 60)}:${(avgPaceSeconds % 60).toString().padStart(2, '0')}` : 
+    '0:00';
 
   const stats = [
     {

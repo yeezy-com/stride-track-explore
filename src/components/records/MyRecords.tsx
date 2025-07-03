@@ -15,9 +15,21 @@ export const MyRecords = () => {
 
   // localStorage에서 실시간 러닝 기록 불러오기
   useEffect(() => {
-    const savedRecords = JSON.parse(localStorage.getItem('runningRecords') || '[]');
-    const combinedRecords = [...savedRecords, ...mockRunningRecords];
-    setRecords(combinedRecords);
+    const loadRecords = () => {
+      const savedRecords = JSON.parse(localStorage.getItem('runningRecords') || '[]');
+      const combinedRecords = [...savedRecords, ...mockRunningRecords];
+      setRecords(combinedRecords);
+    };
+
+    loadRecords();
+
+    // 새 기록이 저장될 때마다 업데이트
+    const handleRecordSaved = () => {
+      loadRecords();
+    };
+
+    window.addEventListener('recordSaved', handleRecordSaved);
+    return () => window.removeEventListener('recordSaved', handleRecordSaved);
   }, []);
 
   const getRecentRecords = () => {

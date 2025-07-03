@@ -3,338 +3,310 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Square, MapPin, Clock, Activity, Target, CheckCircle, AlertCircle } from 'lucide-react';
+import { Play, Pause, Square, MapPin, Clock, Activity } from 'lucide-react';
 import { RunningStats } from './RunningStats';
 import { LiveMap } from './LiveMap';
-import { useToast } from '@/hooks/use-toast';
+
+export interface RunningSession {
+  isRunning: boolean;
+  isPaused: boolean;
+  startTime: Date | null;
+  pausedTime: number;
+  selectedCourse: any;
+  currentPosition: [number, number] | null;
+  distance: number;
+  calories: number;
+  pace: string;
+  heartRate: number;
+  routePoints: [number, number][];
+}
 
 export const LiveTracking = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [startTime, setStartTime] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [distance, setDistance] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState(null);
-  const [route, setRoute] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [trackingStatus, setTrackingStatus] = useState('on-track'); // 'on-track', 'off-track', 'completed'
-  const { toast } = useToast();
+  const [session, setSession] = useState<RunningSession>({
+    isRunning: false,
+    isPaused: false,
+    startTime: null,
+    pausedTime: 0,
+    selectedCourse: null,
+    currentPosition: null,
+    distance: 0,
+    calories: 0,
+    pace: '0:00',
+    heartRate: 0,
+    routePoints: []
+  });
 
-  // 코스 선택 이벤트 리스너
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [onTrackStatus, setOnTrackStatus] = useState<'on-track' | 'off-track' | 'unknown'>('unknown');
+
+  // 선택된 코스로 러닝 시작하는 이벤트 리스너
   useEffect(() => {
-    const handleStartRunning = (event) => {
+    const handleStartRunning = (event: CustomEvent) => {
       const course = event.detail;
-      setSelectedCourse(course);
-      toast({
-        title: "코스 선택됨",
-        description: `${course.name} 코스가 선택되었습니다. 러닝을 시작해보세요!`,
-      });
+      console.log('Starting running with course:', course);
+      setSession(prev => ({
+        ...prev,
+        selectedCourse: course
+      }));
     };
 
-    window.addEventListener('startRunningWithCourse', handleStartRunning);
-    return () => window.removeEventListener('startRunningWithCourse', handleStartRunning);
-  }, [toast]);
+    window.addEventListener('startRunningWithCourse', handleStartRunning as EventListener);
+    return () => window.removeEventListener('startRunningWithCourse', handleStartRunning as EventListener);
+  }, []);
 
+  // 경과 시간 계산
   useEffect(() => {
-    let interval;
-    if (isRunning && !isPaused && startTime) {
+    let interval: NodeJS.Timeout;
+    
+    if (session.isRunning && !session.isPaused && session.startTime) {
       interval = setInterval(() => {
-        setElapsedTime(Date.now() - startTime);
+        const now = new Date().getTime();
+        const start = session.startTime!.getTime();
+        setElapsedTime(Math.floor((now - start - session.pausedTime) / 1000));
       }, 1000);
     }
+
     return () => clearInterval(interval);
-  }, [isRunning, isPaused, startTime]);
+  }, [session.isRunning, session.isPaused, session.startTime, session.pausedTime]);
 
+  // 위치 추적 및 거리 계산
   useEffect(() => {
-    if (isRunning && !isPaused) {
-      const watchId = navigator.geolocation.watchPosition(
+    let watchId: number;
+
+    if (session.isRunning && !session.isPaused) {
+      watchId = navigator.geolocation.watchPosition(
         (position) => {
-          const newLocation = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            timestamp: Date.now()
-          };
+          const newPosition: [number, number] = [position.coords.longitude, position.coords.latitude];
           
-          setCurrentLocation(newLocation);
-          setRoute(prev => {
-            const newRoute = [...prev, newLocation];
-            // 거리 계산 (간단한 직선 거리)
-            if (prev.length > 0) {
-              const lastPoint = prev[prev.length - 1];
-              const dist = calculateDistance(
-                lastPoint.latitude, lastPoint.longitude,
-                newLocation.latitude, newLocation.longitude
-              );
-              setDistance(prevDistance => prevDistance + dist);
+          setSession(prev => {
+            const newRoutePoints = [...prev.routePoints, newPosition];
+            let newDistance = prev.distance;
+            
+            // 거리 계산 (간단한 유클리드 거리)
+            if (prev.routePoints.length > 0) {
+              const lastPoint = prev.routePoints[prev.routePoints.length - 1];
+              const deltaX = newPosition[0] - lastPoint[0];
+              const deltaY = newPosition[1] - lastPoint[1];
+              const segmentDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 111; // 대략적인 km 변환
+              newDistance += segmentDistance;
             }
 
-            // 코스 트랙 추적 확인
-            if (selectedCourse && selectedCourse.routeCoordinates) {
-              checkTrackingStatus(newLocation, selectedCourse.routeCoordinates);
+            // 칼로리 계산 (대략적으로 거리 * 60)
+            const newCalories = Math.round(newDistance * 60);
+
+            // 페이스 계산
+            const timeInMinutes = elapsedTime / 60;
+            const paceMinutes = timeInMinutes > 0 ? timeInMinutes / newDistance : 0;
+            const paceString = paceMinutes > 0 ? 
+              `${Math.floor(paceMinutes)}:${Math.round((paceMinutes % 1) * 60).toString().padStart(2, '0')}` : 
+              '0:00';
+
+            // 트랙 추적 상태 업데이트
+            if (prev.selectedCourse && prev.selectedCourse.routeCoordinates) {
+              const courseRoute = prev.selectedCourse.routeCoordinates;
+              const distanceFromRoute = courseRoute.reduce((minDist: number, point: [number, number]) => {
+                const dist = Math.sqrt(
+                  Math.pow(newPosition[0] - point[0], 2) + 
+                  Math.pow(newPosition[1] - point[1], 2)
+                );
+                return Math.min(minDist, dist);
+              }, Infinity);
+
+              setOnTrackStatus(distanceFromRoute < 0.001 ? 'on-track' : 'off-track'); // 약 100m 이내
             }
 
-            return newRoute;
+            return {
+              ...prev,
+              currentPosition: newPosition,
+              routePoints: newRoutePoints,
+              distance: newDistance,
+              calories: newCalories,
+              pace: paceString,
+              heartRate: 140 + Math.round(Math.random() * 40) // 시뮬레이션된 심박수
+            };
           });
         },
-        (error) => {
-          console.error('위치 추적 오류:', error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
+        (error) => console.error('위치 추적 오류:', error),
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
       );
-
-      return () => navigator.geolocation.clearWatch(watchId);
-    }
-  }, [isRunning, isPaused, selectedCourse]);
-
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // 지구 반지름 (km)
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  const checkTrackingStatus = (currentLocation, courseRoute) => {
-    // 현재 위치와 코스 경로의 가장 가까운 점 사이의 거리 확인
-    let minDistance = Infinity;
-    courseRoute.forEach(point => {
-      const dist = calculateDistance(
-        currentLocation.latitude, currentLocation.longitude,
-        point[1], point[0]
-      );
-      minDistance = Math.min(minDistance, dist);
-    });
-
-    // 50미터 이내면 올바른 경로, 그 이상이면 벗어남
-    if (minDistance <= 0.05) { // 0.05km = 50m
-      if (trackingStatus !== 'on-track') {
-        setTrackingStatus('on-track');
-        toast({
-          title: "경로 복귀",
-          description: "코스 경로로 돌아왔습니다!",
-        });
-      }
-    } else {
-      if (trackingStatus !== 'off-track') {
-        setTrackingStatus('off-track');
-        toast({
-          title: "경로 이탈",
-          description: "코스 경로에서 벗어났습니다. 경로를 확인해주세요.",
-        });
-      }
     }
 
-    // 목표 거리 달성 확인
-    if (selectedCourse && distance >= selectedCourse.distance && trackingStatus !== 'completed') {
-      setTrackingStatus('completed');
-      toast({
-        title: "코스 완주!",
-        description: `${selectedCourse.name} 코스를 완주했습니다!`,
-      });
-    }
-  };
-
-  const formatTime = (ms) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    return `${hours.toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
-  };
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [session.isRunning, session.isPaused, elapsedTime]);
 
   const startRunning = () => {
-    setIsRunning(true);
-    setIsPaused(false);
-    setStartTime(Date.now());
-    setElapsedTime(0);
-    setDistance(0);
-    setRoute([]);
-    setTrackingStatus('on-track');
+    setSession(prev => ({
+      ...prev,
+      isRunning: true,
+      isPaused: false,
+      startTime: new Date()
+    }));
   };
 
   const pauseRunning = () => {
-    setIsPaused(!isPaused);
+    setSession(prev => ({
+      ...prev,
+      isPaused: !prev.isPaused
+    }));
   };
 
   const stopRunning = () => {
-    if (isRunning) {
+    if (session.startTime && session.distance > 0) {
       // 러닝 기록 저장
-      const runningRecord = {
-        id: Date.now(),
-        courseName: selectedCourse ? selectedCourse.name : '자유 러닝',
-        courseId: selectedCourse ? selectedCourse.id : null,
-        date: new Date().toLocaleDateString('ko-KR'),
-        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-        distance: distance.toFixed(2),
-        duration: formatTime(elapsedTime),
-        pace: distance > 0 ? `${((elapsedTime / 1000 / 60) / distance).toFixed(1)}분/km` : '0분/km',
-        calories: Math.floor(distance * 65),
-        averageHeartRate: Math.floor(Math.random() * 40) + 140,
-        maxHeartRate: Math.floor(Math.random() * 30) + 170,
+      const newRecord = {
+        id: Date.now().toString(),
+        courseId: session.selectedCourse?.id || 'free-run',
+        courseName: session.selectedCourse?.name || '자유 러닝',
+        date: new Date().toISOString().split('T')[0],
+        time: session.startTime.toTimeString().split(' ')[0].substring(0, 5),
+        duration: `${Math.floor(elapsedTime / 60)}:${(elapsedTime % 60).toString().padStart(2, '0')}`,
+        distance: Number(session.distance.toFixed(1)),
+        pace: session.pace,
+        calories: session.calories,
+        averageHeartRate: session.heartRate,
+        maxHeartRate: session.heartRate + 15,
         weather: '맑음',
         temperature: '22°C',
-        notes: selectedCourse ? `${selectedCourse.name} 코스로 러닝 완료` : '자유 러닝 완료',
-        route: route
+        notes: session.selectedCourse ? `${session.selectedCourse.name} 코스로 러닝했습니다.` : '자유 러닝을 했습니다.'
       };
 
-      // localStorage에 기록 저장
+      // localStorage에 저장
       const existingRecords = JSON.parse(localStorage.getItem('runningRecords') || '[]');
-      existingRecords.unshift(runningRecord);
-      localStorage.setItem('runningRecords', JSON.stringify(existingRecords));
-
-      toast({
-        title: "러닝 완료!",
-        description: "러닝 기록이 저장되었습니다.",
-      });
+      const updatedRecords = [newRecord, ...existingRecords];
+      localStorage.setItem('runningRecords', JSON.stringify(updatedRecords));
+      
+      console.log('Running record saved:', newRecord);
+      
+      // 기록 저장 완료 이벤트 발생
+      window.dispatchEvent(new CustomEvent('recordSaved'));
     }
 
-    setIsRunning(false);
-    setIsPaused(false);
-    setStartTime(null);
-    setSelectedCourse(null);
-    setTrackingStatus('on-track');
+    // 세션 초기화
+    setSession({
+      isRunning: false,
+      isPaused: false,
+      startTime: null,
+      pausedTime: 0,
+      selectedCourse: null,
+      currentPosition: null,
+      distance: 0,
+      calories: 0,
+      pace: '0:00',
+      heartRate: 0,
+      routePoints: []
+    });
+    setElapsedTime(0);
+    setOnTrackStatus('unknown');
   };
 
-  const averagePace = distance > 0 ? (elapsedTime / 1000 / 60) / distance : 0;
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        {selectedCourse && (
-          <Card className="bg-gradient-to-br from-green-50 to-blue-50 border-green-200">
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">실시간 러닝</h2>
+        <p className="text-gray-600">러닝을 시작하고 실시간으로 기록을 확인해보세요</p>
+      </div>
+
+      {session.selectedCourse && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <MapPin className="w-5 h-5" />
+              선택된 코스: {session.selectedCourse.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-blue-700">
+                거리: {session.selectedCourse.distance}km • 난이도: {session.selectedCourse.difficulty}
+              </div>
+              {session.isRunning && (
+                <Badge 
+                  variant={onTrackStatus === 'on-track' ? 'default' : onTrackStatus === 'off-track' ? 'destructive' : 'secondary'}
+                >
+                  {onTrackStatus === 'on-track' ? '코스 따라가는 중' : 
+                   onTrackStatus === 'off-track' ? '코스 이탈' : '위치 확인 중'}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-green-500" />
-                선택된 코스
+                <Clock className="w-5 h-5" />
+                러닝 컨트롤
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">{selectedCourse.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedCourse.location}</p>
-                  <p className="text-sm text-gray-600">{selectedCourse.distance}km • {selectedCourse.difficulty}</p>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-green-600 mb-2">
+                  {formatTime(elapsedTime)}
                 </div>
-                <div className="text-right">
-                  <Badge 
-                    variant={trackingStatus === 'on-track' ? 'default' : trackingStatus === 'off-track' ? 'destructive' : 'default'}
-                  >
-                    {trackingStatus === 'on-track' && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {trackingStatus === 'off-track' && <AlertCircle className="w-3 h-3 mr-1" />}
-                    {trackingStatus === 'completed' && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {trackingStatus === 'on-track' && '경로 추적 중'}
-                    {trackingStatus === 'off-track' && '경로 이탈'}
-                    {trackingStatus === 'completed' && '완주!'}
-                  </Badge>
-                </div>
+                <div className="text-sm text-gray-600">경과 시간</div>
+              </div>
+              
+              <div className="flex gap-2 justify-center">
+                {!session.isRunning ? (
+                  <Button onClick={startRunning} className="flex items-center gap-2">
+                    <Play className="w-4 h-4" />
+                    시작
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      onClick={pauseRunning} 
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <Pause className="w-4 h-4" />
+                      {session.isPaused ? '재개' : '일시정지'}
+                    </Button>
+                    <Button 
+                      onClick={stopRunning} 
+                      variant="destructive"
+                      className="flex items-center gap-2"
+                    >
+                      <Square className="w-4 h-4" />
+                      종료
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
-        )}
 
-        <Card className="bg-gradient-to-br from-blue-50 to-green-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-500" />
-              실시간 러닝 추적
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {formatTime(elapsedTime)}
-                </div>
-                <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  시간
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-600">
-                  {distance.toFixed(2)}km
-                </div>
-                <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  거리
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {averagePace.toFixed(1)}
-                </div>
-                <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                  <Target className="w-4 h-4" />
-                  평균 페이스
-                </div>
-              </div>
-            </div>
+          <RunningStats 
+            distance={session.distance}
+            calories={session.calories}
+            pace={session.pace}
+            heartRate={session.heartRate}
+          />
+        </div>
 
-            <div className="flex items-center justify-center gap-3">
-              {!isRunning ? (
-                <Button 
-                  onClick={startRunning}
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 px-8"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  러닝 시작
-                </Button>
-              ) : (
-                <>
-                  <Button 
-                    onClick={pauseRunning}
-                    variant="outline"
-                    className="px-6"
-                  >
-                    {isPaused ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
-                    {isPaused ? '재개' : '일시정지'}
-                  </Button>
-                  <Button 
-                    onClick={stopRunning}
-                    variant="destructive"
-                    className="px-6"
-                  >
-                    <Square className="w-4 h-4 mr-2" />
-                    종료
-                  </Button>
-                </>
-              )}
-            </div>
-
-            {isRunning && (
-              <div className="text-center">
-                <Badge variant={isPaused ? "secondary" : "default"} className="text-sm">
-                  {isPaused ? "일시정지됨" : "러닝 중"}
-                </Badge>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <RunningStats 
-          elapsedTime={elapsedTime}
-          distance={distance}
-          route={route}
-          isRunning={isRunning}
-          selectedCourse={selectedCourse}
-          trackingStatus={trackingStatus}
-        />
-      </div>
-
-      <div className="lg:sticky lg:top-24">
-        <LiveMap 
-          currentLocation={currentLocation}
-          route={route}
-          isRunning={isRunning}
-          selectedCourse={selectedCourse}
-        />
+        <div>
+          <LiveMap 
+            currentPosition={session.currentPosition}
+            routePoints={session.routePoints}
+            selectedCourse={session.selectedCourse}
+          />
+        </div>
       </div>
     </div>
   );
