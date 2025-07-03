@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { CourseMap } from './CourseMap';
 import { CourseDetail } from './CourseDetail';
 import { LocationFilter } from './LocationFilter';
 import { useCourses } from '../../contexts/CourseContext';
+import { mockCourses } from '../../data/mockData';
 
 export const CourseExplorer = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -18,7 +18,10 @@ export const CourseExplorer = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('전체');
   const { courses } = useCourses();
 
-  const filteredCourses = courses.filter(course => {
+  // Context에서 가져온 courses가 비어있으면 mockCourses 사용
+  const displayCourses = courses.length > 0 ? courses : mockCourses;
+
+  const filteredCourses = displayCourses.filter(course => {
     const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLocation = selectedLocation === '전체' || course.location.includes(selectedLocation);
@@ -74,80 +77,91 @@ export const CourseExplorer = () => {
         </div>
 
         <div className="space-y-4 max-h-[600px] overflow-y-auto">
-          {filteredCourses.map((course) => (
-            <Card 
-              key={course.id}
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
-              onClick={() => setSelectedCourse(course)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg font-semibold text-gray-800">
-                    {course.name}
-                  </CardTitle>
-                  <Badge variant={course.difficulty === '초급' ? 'default' : course.difficulty === '중급' ? 'secondary' : 'destructive'}>
-                    {course.difficulty}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  {course.location}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{course.distance}km</div>
-                    <div className="text-xs text-gray-600">거리</div>
+          {filteredCourses.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-2">
+                {displayCourses.length === 0 ? '러닝 코스를 불러오는 중...' : '검색 조건에 맞는 코스가 없습니다.'}
+              </p>
+              {displayCourses.length === 0 && (
+                <p className="text-sm text-gray-400">잠시만 기다려주세요.</p>
+              )}
+            </div>
+          ) : (
+            filteredCourses.map((course) => (
+              <Card 
+                key={course.id}
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500"
+                onClick={() => setSelectedCourse(course)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg font-semibold text-gray-800">
+                      {course.name}
+                    </CardTitle>
+                    <Badge variant={course.difficulty === '초급' ? 'default' : course.difficulty === '중급' ? 'secondary' : 'destructive'}>
+                      {course.difficulty}
+                    </Badge>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-green-600">{course.estimatedTime}</div>
-                    <div className="text-xs text-gray-600">예상 시간</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    {course.location}
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-4 h-4" />
-                      {course.likes}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      {course.completedCount}
-                    </span>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-600">{course.distance}km</div>
+                      <div className="text-xs text-gray-600">거리</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-green-600">{course.estimatedTime}</div>
+                      <div className="text-xs text-gray-600">예상 시간</div>
+                    </div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleStartRunning(course);
-                    }}
-                  >
-                    <Play className="w-3 h-3 mr-1" />
-                    시작
-                  </Button>
-                </div>
-                
-                {course.tags && course.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {course.tags.slice(0, 3).map((tag: string, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-4 h-4" />
+                        {course.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        {course.completedCount}
+                      </span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartRunning(course);
+                      }}
+                    >
+                      <Play className="w-3 h-3 mr-1" />
+                      시작
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  
+                  {course.tags && course.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {course.tags.slice(0, 3).map((tag: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
 
       <div className="lg:sticky lg:top-24">
         <CourseMap 
-          courses={filteredCourses} 
+          courses={displayCourses} 
           onCourseSelect={setSelectedCourse}
         />
       </div>
