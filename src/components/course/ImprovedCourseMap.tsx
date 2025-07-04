@@ -14,15 +14,14 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
   const [hoveredCourse, setHoveredCourse] = useState<any>(null);
   const [selectedRouteType, setSelectedRouteType] = useState('전체');
 
-  // 서울 지역 실제 좌표를 SVG 좌표로 변환하는 함수
+  // 실제 서울 좌표를 SVG 좌표로 변환하는 함수
   const coordToSVG = (lng: number, lat: number) => {
-    // 서울 중심 좌표 (126.9784, 37.5666)를 기준으로 변환
-    const centerLng = 126.9784;
-    const centerLat = 37.5666;
-    const scale = 8000; // 스케일 조정
+    // 서울 경계를 반영한 좌표 변환
+    const minLng = 126.734, maxLng = 127.270;
+    const minLat = 37.428, maxLat = 37.701;
     
-    const x = 300 + (lng - centerLng) * scale;
-    const y = 200 - (lat - centerLat) * scale;
+    const x = ((lng - minLng) / (maxLng - minLng)) * 560 + 20;
+    const y = ((maxLat - lat) / (maxLat - minLat)) * 360 + 20;
     
     return { x: Math.max(20, Math.min(580, x)), y: Math.max(20, Math.min(380, y)) };
   };
@@ -43,7 +42,7 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg font-bold text-gray-800">
             <Navigation className="w-5 h-5 text-blue-500" />
-            러닝 코스 지도
+            서울 러닝 코스 지도
           </CardTitle>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-500" />
@@ -69,23 +68,27 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
       
       <CardContent className="p-0 h-[calc(100%-120px)] relative">
         <div className="w-full h-full bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
-          {/* 지도 배경 SVG */}
+          {/* 실제 서울 지도 SVG */}
           <svg
             width="100%"
             height="100%"
             viewBox="0 0 600 400"
             className="absolute inset-0"
           >
-            {/* 배경 정의 */}
             <defs>
-              <pattern id="mapGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" strokeWidth="1" opacity="0.3"/>
+              <pattern id="mapGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" strokeWidth="0.5" opacity="0.2"/>
               </pattern>
               
               <linearGradient id="riverGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#60a5fa" />
                 <stop offset="50%" stopColor="#3b82f6" />
                 <stop offset="100%" stopColor="#1e40af" />
+              </linearGradient>
+              
+              <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#16a34a" />
+                <stop offset="100%" stopColor="#15803d" />
               </linearGradient>
               
               <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -97,101 +100,139 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
             <rect width="100%" height="100%" fill="#f8fafc" />
             <rect width="100%" height="100%" fill="url(#mapGrid)" />
             
-            {/* 한강 표현 - 실제 지형과 유사하게 */}
+            {/* 행정구역 경계 (간소화된 서울 외곽선) */}
             <path
-              d="M 80 220 Q 150 200 220 210 Q 290 220 360 215 Q 430 210 500 220 Q 520 225 540 230"
+              d="M 50 120 Q 80 80 150 90 Q 250 70 350 85 Q 450 95 520 110 Q 550 130 570 160 Q 580 200 570 250 Q 560 300 540 330 Q 500 360 450 370 Q 400 375 350 370 Q 300 365 250 355 Q 200 345 150 330 Q 100 310 70 280 Q 40 240 45 200 Q 48 160 50 120 Z"
+              fill="#f1f5f9"
+              stroke="#cbd5e1"
+              strokeWidth="1"
+              opacity="0.6"
+            />
+            
+            {/* 한강 - 실제 흐름을 반영 */}
+            <path
+              d="M 80 220 Q 120 200 180 205 Q 240 210 300 215 Q 360 220 420 218 Q 480 216 520 225 Q 540 230 550 240"
               stroke="url(#riverGradient)"
-              strokeWidth="16"
+              strokeWidth="12"
               fill="none"
               opacity="0.8"
             />
             
-            {/* 주요 랜드마크 */}
-            <g>
-              {/* 남산 */}
-              <circle cx="300" cy="180" r="8" fill="#16a34a" opacity="0.6" />
-              <text x="312" y="185" className="text-xs fill-green-700 font-medium">남산</text>
-              
-              {/* 여의도 */}
-              <rect x="220" y="205" width="40" height="15" fill="#94a3b8" opacity="0.5" rx="3" />
-              <text x="225" y="203" className="text-xs fill-gray-600 font-medium">여의도</text>
-              
-              {/* 잠실 */}
-              <circle cx="450" cy="190" r="12" fill="#f59e0b" opacity="0.4" />
-              <text x="420" y="178" className="text-xs fill-orange-600 font-medium">잠실</text>
-              
-              {/* 강남 */}
-              <rect x="350" y="250" width="60" height="20" fill="#8b5cf6" opacity="0.3" rx="5" />
-              <text x="370" y="263" className="text-xs fill-purple-700 font-medium">강남</text>
-            </g>
+            {/* 지천들 */}
+            <path d="M 200 180 Q 220 190 240 210" stroke="#60a5fa" strokeWidth="4" fill="none" opacity="0.6" />
+            <path d="M 350 180 Q 370 200 380 220" stroke="#60a5fa" strokeWidth="4" fill="none" opacity="0.6" />
+            <path d="M 450 200 Q 470 210 485 220" stroke="#60a5fa" strokeWidth="4" fill="none" opacity="0.6" />
+            
+            {/* 주요 산 */}
+            {/* 북한산 */}
+            <ellipse cx="200" cy="120" rx="40" ry="25" fill="url(#mountainGradient)" opacity="0.7" />
+            <text x="175" y="100" className="text-xs fill-green-800 font-semibold">북한산</text>
+            
+            {/* 남산 */}
+            <ellipse cx="300" cy="200" rx="20" ry="15" fill="url(#mountainGradient)" opacity="0.7" />
+            <text x="315" y="205" className="text-xs fill-green-800 font-semibold">남산</text>
+            
+            {/* 관악산 */}
+            <ellipse cx="280" cy="320" rx="30" ry="20" fill="url(#mountainGradient)" opacity="0.7" />
+            <text x="250" y="340" className="text-xs fill-green-800 font-semibold">관악산</text>
+            
+            {/* 주요 지역 표시 */}
+            {/* 강남 */}
+            <rect x="350" y="280" width="80" height="30" fill="#e879f9" opacity="0.3" rx="5" />
+            <text x="375" y="298" className="text-sm fill-purple-700 font-semibold">강 남</text>
+            
+            {/* 강북 */}
+            <rect x="250" y="140" width="60" height="25" fill="#06b6d4" opacity="0.3" rx="5" />
+            <text x="270" y="155" className="text-sm fill-cyan-700 font-semibold">강 북</text>
+            
+            {/* 여의도 */}
+            <ellipse cx="220" cy="215" rx="25" ry="12" fill="#94a3b8" opacity="0.5" />
+            <text x="200" y="200" className="text-xs fill-gray-700 font-semibold">여의도</text>
+            
+            {/* 잠실 */}
+            <rect x="480" y="240" width="40" height="25" fill="#f59e0b" opacity="0.4" rx="5" />
+            <text x="490" y="255" className="text-xs fill-orange-700 font-semibold">잠실</text>
+            
+            {/* 홍대 */}
+            <circle cx="150" cy="180" r="15" fill="#ec4899" opacity="0.4" />
+            <text x="125" y="200" className="text-xs fill-pink-700 font-semibold">홍대</text>
+            
+            {/* 광화문 */}
+            <rect x="280" y="170" width="30" height="20" fill="#fbbf24" opacity="0.5" rx="3" />
+            <text x="285" y="165" className="text-xs fill-yellow-700 font-semibold">광화문</text>
 
             {/* 코스 경로들 */}
             {filteredCourses.map((course, index) => {
-              const startPoint = coordToSVG(course.coordinates[0], course.coordinates[1]);
+              if (!course.routeCoordinates || course.routeCoordinates.length < 2) return null;
+              
               const routeColor = routeColors[course.difficulty] || '#3B82F6';
               
-              // 코스 경로 그리기
-              if (course.routeCoordinates && course.routeCoordinates.length > 1) {
-                const pathData = course.routeCoordinates
-                  .map((coord: number[], i: number) => {
-                    const point = coordToSVG(coord[0], coord[1]);
-                    return `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`;
-                  })
-                  .join(' ');
+              const pathData = course.routeCoordinates
+                .map((coord: number[], i: number) => {
+                  const point = coordToSVG(coord[0], coord[1]);
+                  return `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`;
+                })
+                .join(' ');
 
-                return (
-                  <g key={course.id}>
-                    {/* 코스 경로 라인 */}
-                    <path
-                      d={pathData}
-                      stroke={routeColor}
-                      strokeWidth="4"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      opacity="0.8"
-                      className="cursor-pointer hover:opacity-100 transition-all"
-                      filter="url(#shadow)"
-                      onClick={() => onCourseSelect(course)}
-                      onMouseEnter={() => setHoveredCourse(course)}
-                      onMouseLeave={() => setHoveredCourse(null)}
-                    />
-                    
-                    {/* 시작점 마커 */}
-                    <g className="cursor-pointer" onClick={() => onCourseSelect(course)}>
-                      <circle
-                        cx={startPoint.x}
-                        cy={startPoint.y}
-                        r="8"
-                        fill="white"
-                        stroke={routeColor}
-                        strokeWidth="3"
-                        className="hover:r-10 transition-all"
-                        filter="url(#shadow)"
-                      />
-                      <circle
-                        cx={startPoint.x}
-                        cy={startPoint.y}
-                        r="4"
-                        fill={routeColor}
-                      />
+              return (
+                <g key={course.id}>
+                  {/* 코스 경로 라인 */}
+                  <path
+                    d={pathData}
+                    stroke={routeColor}
+                    strokeWidth="3"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity="0.8"
+                    className="cursor-pointer hover:opacity-100 hover:stroke-width-4 transition-all"
+                    filter="url(#shadow)"
+                    onClick={() => onCourseSelect(course)}
+                    onMouseEnter={() => setHoveredCourse(course)}
+                    onMouseLeave={() => setHoveredCourse(null)}
+                  />
+                  
+                  {/* 시작점 마커 */}
+                  <g className="cursor-pointer" onClick={() => onCourseSelect(course)}>
+                    {course.routeCoordinates.map((coord: number[], pointIndex: number) => {
+                      if (pointIndex !== 0) return null; // 시작점만 표시
+                      const point = coordToSVG(coord[0], coord[1]);
                       
-                      {/* 거리 표시 */}
-                      <text
-                        x={startPoint.x}
-                        y={startPoint.y - 15}
-                        textAnchor="middle"
-                        className="text-xs font-bold fill-gray-700"
-                        style={{ textShadow: '1px 1px 2px white' }}
-                      >
-                        {course.distance}km
-                      </text>
-                    </g>
+                      return (
+                        <g key={`start-${course.id}`}>
+                          <circle
+                            cx={point.x}
+                            cy={point.y}
+                            r="8"
+                            fill="white"
+                            stroke={routeColor}
+                            strokeWidth="3"
+                            className="hover:r-10 transition-all"
+                            filter="url(#shadow)"
+                          />
+                          <circle
+                            cx={point.x}
+                            cy={point.y}
+                            r="4"
+                            fill={routeColor}
+                          />
+                          
+                          {/* 거리 표시 */}
+                          <text
+                            x={point.x}
+                            y={point.y - 15}
+                            textAnchor="middle"
+                            className="text-xs font-bold fill-gray-700"
+                            style={{ textShadow: '1px 1px 2px white' }}
+                          >
+                            {course.distance}km
+                          </text>
+                        </g>
+                      );
+                    })}
                   </g>
-                );
-              }
-              
-              return null;
+                </g>
+              );
             })}
             
             {/* 호버된 코스 정보 */}
@@ -200,8 +241,8 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
                 <rect
                   x="20"
                   y="20"
-                  width="200"
-                  height="80"
+                  width="220"
+                  height="90"
                   fill="white"
                   stroke="#e2e8f0"
                   strokeWidth="2"
@@ -219,6 +260,9 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
                 </text>
                 <text x="30" y="85" className="text-xs fill-gray-600">
                   ❤️ {hoveredCourse.likes} • 👥 {hoveredCourse.completedCount}
+                </text>
+                <text x="30" y="100" className="text-xs fill-blue-600">
+                  💪 {hoveredCourse.difficulty} 코스
                 </text>
               </g>
             )}
@@ -299,28 +343,32 @@ export const ImprovedCourseMap: React.FC<ImprovedCourseMapProps> = ({ courses, o
           
           {/* 범례 */}
           <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm p-3 rounded-2xl shadow-lg border border-white/50">
-            <div className="text-xs font-semibold text-gray-700 mb-2">범례</div>
+            <div className="text-xs font-semibold text-gray-700 mb-2">지도 범례</div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <div className="w-4 h-1 bg-blue-500 rounded opacity-80"></div>
-                <span>러닝 코스</span>
+                <span>한강</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <div className="w-3 h-3 bg-green-600 rounded-full opacity-70"></div>
+                <span>산/공원</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <div className="w-3 h-3 bg-white border-2 border-blue-500 rounded-full"></div>
-                <span>시작점</span>
+                <span>코스 시작점</span>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: routeColors['초급'] }}></div>
-                  <span className="text-gray-600">초급</span>
+                  <span className="text-gray-600">초급 코스</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: routeColors['중급'] }}></div>
-                  <span className="text-gray-600">중급</span>
+                  <span className="text-gray-600">중급 코스</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: routeColors['고급'] }}></div>
-                  <span className="text-gray-600">고급</span>
+                  <span className="text-gray-600">고급 코스</span>
                 </div>
               </div>
             </div>
