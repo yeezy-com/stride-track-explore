@@ -43,7 +43,7 @@ interface CourseProviderProps {
 }
 
 export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<Course[]>(mockCourses as Course[]);
 
   const addCourse = (newCourse: Omit<Course, 'id' | 'likes' | 'completedCount'>) => {
     const course: Course = {
