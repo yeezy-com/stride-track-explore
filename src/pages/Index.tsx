@@ -30,7 +30,7 @@ const Index = () => {
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || CourseRecommendation;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
       
       {/* 메인 컨텐츠 */}
@@ -41,7 +41,7 @@ const Index = () => {
       </main>
 
       {/* 하단 탭 네비게이션 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg z-50">
         <div className="grid grid-cols-4 h-16">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -53,13 +53,13 @@ const Index = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex flex-col items-center justify-center gap-1 transition-all duration-200 ${
                   isActive 
-                    ? 'text-blue-600' 
+                    ? 'text-gray-900' 
                     : 'text-gray-500'
                 }`}
               >
                 <div className={`p-1 rounded-lg transition-all duration-200 ${
                   isActive 
-                    ? 'bg-blue-100 scale-110' 
+                    ? 'bg-gray-200 scale-110' 
                     : 'hover:bg-gray-100'
                 }`}>
                   <Icon className="w-6 h-6" />
@@ -70,7 +70,7 @@ const Index = () => {
                   {tab.label}
                 </span>
                 {isActive && (
-                  <div className="w-4 h-0.5 bg-blue-600 rounded-full mt-1"></div>
+                  <div className="w-4 h-0.5 bg-gray-800 rounded-full mt-1"></div>
                 )}
               </button>
             );
