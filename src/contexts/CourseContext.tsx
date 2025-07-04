@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { mockCourses } from '../data/mockData';
 
@@ -12,7 +13,14 @@ interface Course {
   completedCount: number;
   tags?: string[];
   description?: string;
-  coordinates?: [number, number][];
+  coordinates?: [number, number];
+  isLiked?: boolean;
+  author?: string;
+  createdAt?: string;
+  elevationProfile?: number[];
+  routeCoordinates?: [number, number][];
+  region?: string;
+  district?: string;
 }
 
 interface CourseContextType {
